@@ -2,13 +2,13 @@
 #define dmx2serial_h
 #include "Arduino.h"
 
-#define DMX2SFLAG_PAYLOAD 		0b10000000
-#define DMX2SFLAG_SUCCESS 		0b01000000
-#define DMX2SFLAG_CONFIGURATE 	0b00000100
-#define DMX2SFLAG_HELLO			0b00000010
-#define DMX2SFLAG_PARITY		0b00000001
+#define DMX2SFLAG_PAYLOAD     0b10000000
+#define DMX2SFLAG_SUCCESS     0b01000000
+#define DMX2SFLAG_CONFIGURATE 0b00000100
+#define DMX2SFLAG_HELLO       0b00000010
+#define DMX2SFLAG_PARITY      0b00000001
 
-#define DMX2S_DEBUG(__args__) if (_debugStream) { _debugStream.print(__args__); };
+#define DMX2S_DEBUG(__args__)   if (_debugStream) { _debugStream.print(__args__); };
 #define DMX2S_DEBUGLN(__args__) if (_debugStream) { _debugStream.println(__args__); };
 
 class dmx2serial {

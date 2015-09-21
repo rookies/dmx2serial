@@ -23,37 +23,36 @@ bool dmx2serial::isConnected() {
 
 bool dmx2serial::poll() {
 	bool returnCode = false;
-	if (!_configurated) {
-		return false;
-	};
-	if (_inputPointer < 2) {
-		/* Reading header. */
-		do {
-			int incoming = _serial.read();
-			_storeIncoming(incoming);
-		} while (incoming != -1 && _inputPointer <= 2);
-	};
-	if (_inputPointer == 2) {
-		/* Checking if we have payload. */
-		if ((_inputBuffer[1] & DMX2SFLAG_PAYLOAD) == 0) {
-			/* Processing packet without payload. */
-			returnCode = _processPacket();
-			_inputPointer = 0;
+	if (_configurated) {
+		if (_inputPointer < 2) {
+			/* Reading header. */
+			do {
+				int incoming = _serial.read();
+				_storeIncoming(incoming);
+			} while (incoming != -1 && _inputPointer <= 2);
 		};
-	};
-	if (_inputPointer >= 2) {
-		/* Reading payload. */
-		do {
-			int incoming = _serial.read();
-			_storeIncoming(incoming);
-		} while (incoming != -1 && _inputPointer <= 6);
-	};
-	if (inputPointer == 7) {
-		/* Processing packet with payload. */
-		if (returnCode) {
-			_processPacket();
-		} else {
-			returnCode = _processPacket();
+		if (_inputPointer == 2) {
+			/* Checking if we have payload. */
+			if ((_inputBuffer[1] & DMX2SFLAG_PAYLOAD) == 0) {
+				/* Processing packet without payload. */
+				returnCode = _processPacket();
+				_inputPointer = 0;
+			};
+		};
+		if (_inputPointer >= 2) {
+			/* Reading payload. */
+			do {
+				int incoming = _serial.read();
+				_storeIncoming(incoming);
+			} while (incoming != -1 && _inputPointer <= 6);
+		};
+		if (inputPointer == 7) {
+			/* Processing packet with payload. */
+			if (returnCode) {
+				_processPacket();
+			} else {
+				returnCode = _processPacket();
+			};
 		};
 	};
 	return returnCode;
