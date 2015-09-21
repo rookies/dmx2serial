@@ -22,6 +22,7 @@ class dmx2serial {
 		bool reconfigurate(byte universes, word inputChannels);
 	private:
 		void _storeIncoming(int incoming);
+		void _sendPacket();
 		bool _processPacket();
 		bool _checkParity();
 		void _calculateParity();
@@ -50,6 +51,7 @@ class dmx2serial {
 		 * Flags:
 		*/
 		bool _configurated;
+		bool _hstold;
 		bool _connected;
 }
 

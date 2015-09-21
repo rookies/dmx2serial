@@ -3,6 +3,7 @@
 
 dmx2serial::dmx2serial() {
 	_configurated = false;
+	_hstold = false;
 	_connected = false;
 	_inputPointer = 0;
 	_outputPointer = 0;
@@ -67,6 +68,10 @@ void dmx2serial::_storeIncoming(int incoming) {
 	};
 }
 
+void dmx2serial::_sendPacket() {
+	/* TODO */
+}
+
 bool dmx2serial::_processPacket() {
 	DMX2S_DEBUGLN("dmx2serial::_processPacket() started.")
 	if (!_checkParity()) {
@@ -85,7 +90,32 @@ bool dmx2serial::_processPacket() {
 			DMX2S_DEBUGLN("Handshake already done.")
 			return false;
 		};
-		/* TODO */
+		if (_inputBuffer[0] == 0) {
+			/* HsAsk() */
+			DMX2S_DEBUGLN("Got HsAsk() packet.")
+			_createHsTell();
+			_sendPacket();
+			_hstold = true;
+			DMX2S_DEBUGLN("Sent HsTell() packet.")
+			return true;
+		} else {
+			/* HsAnswer() */
+			DMX2S_DEBUGLN("Got HsAnswer() packet.")
+			if (!_hstold) {
+				DMX2S_DEBUGLN("No HsTell() sent, ignoring.")
+				return false;
+			};
+			if ((__inputBuffer[1] & DMX2SFLAG_SUCCESS) == 0) {
+				DMX2S_DEBUGLN("HsAnswer() wasn't successfull.")
+				_hstold = false;
+				return false;
+			} else {
+				DMX2S_DEBUGLN("HsAnswer() was successfull, handshake done.")
+				_hstold = false;
+				_connected = true;
+				return true;
+			};
+		};
 	} else if ((_inputBuffer[1] & DMX2SFLAG_CONFIGURATE) != 0) {
 		/* Configurate packet. */
 		DMX2S_DEBUGLN("Got configurate packet.")
