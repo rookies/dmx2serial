@@ -46,7 +46,6 @@ class dmx2serial {
 		byte _inputBuffer[7];
 		byte _inputPointer;
 		byte _outputBuffer[7];
-		byte _outputPointer;
 		/*
 		 * Flags:
 		*/

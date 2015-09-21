@@ -6,7 +6,6 @@ dmx2serial::dmx2serial() {
 	_hstold = false;
 	_connected = false;
 	_inputPointer = 0;
-	_outputPointer = 0;
 }
 
 void dmx2serial::begin(Stream &serial, Stream &debugStream, byte universes, word inputChannels) {
@@ -69,7 +68,15 @@ void dmx2serial::_storeIncoming(int incoming) {
 }
 
 void dmx2serial::_sendPacket() {
-	/* TODO */
+	/* TODO: Check if successful. */
+	if ((_outputBuffer[1] & DMX2SFLAG_PAYLOAD) == 0) {
+		byte len = 2;
+	} else {
+		byte len = 7;
+	};
+	for (byte i=0; i < len; ++i) {
+		_serial.write(_outputBuffer[i]);
+	}
 }
 
 bool dmx2serial::_processPacket() {
