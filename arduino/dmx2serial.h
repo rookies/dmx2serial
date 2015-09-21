@@ -2,6 +2,8 @@
 #define dmx2serial_h
 #include "Arduino.h"
 
+#define DMX2S_VERSION 1
+
 #define DMX2SFLAG_PAYLOAD     0b10000000
 #define DMX2SFLAG_SUCCESS     0b01000000
 #define DMX2SFLAG_CONFIGURATE 0b00000100
@@ -25,6 +27,10 @@ class dmx2serial {
 		void _calculateParity();
 		bool _checkChecksum();
 		void _calculateChecksum();
+		void _createHsTell();
+		void _createChAnswer(bool success);
+		void _createChSet(byte universe, word channel, byte value);
+		void _createCfgSet();
 		byte _hammingWeight(byte val);
 		/*
 		 * Configuration:

@@ -129,6 +129,45 @@ void dmx2serial::_calculateChecksum() {
 	/* TODO */
 }
 
+void dmx2serial::_createHsTell() {
+	_outputBuffer[0] = DMX2S_VERSION;
+	_outputBuffer[1] = DMX2SFLAG_PAYLOAD | DMX2SFLAG_SUCCESS | DMX2SFLAG_HELLO;
+	_calculateParity();
+	_outputBuffer[2] = _universes;
+	_outputBuffer[3] = _inputChannels & 0x00FF; // lower byte
+	_outputBuffer[4] = _inputChannels >> 8; // higher byte
+	_outputBuffer[5] = 0;
+	_calculateChecksum();
+}
+
+void dmx2serial::_createChAnswer(bool success) {
+	_outputBuffer[0] = DMX2S_VERSION;
+	_outputBuffer[1] = success?DMX2SFLAG_SUCCESS:0;
+	_calculateParity();
+}
+
+void dmx2serial::_createChSet(byte universe, word channel, byte value) {
+	_outputBuffer[0] = DMX2S_VERSION;
+	_outputBuffer[1] = DMX2SFLAG_PAYLOAD;
+	_calculateParity();
+	_outputBuffer[2] = universe;
+	_outputBuffer[3] = channel & 0x00FF; // lower byte
+	_outputBuffer[4] = channel >> 8; // higher byte
+	_outputBuffer[5] = value;
+	_calculateChecksum();
+}
+
+void dmx2serial::_createCfgSet() {
+	_outputBuffer[0] = DMX2S_VERSION;
+	_outputBuffer[1] = DMX2SFLAG_PAYLOAD | DMX2SFLAG_CONFIGURATE;
+	_calculateParity();
+	_outputBuffer[2] = _universes;
+	_outputBuffer[3] = _inputChannels & 0x00FF; // lower byte
+	_outputBuffer[4] = _inputChannels >> 8; // higher byte
+	_outputBuffer[5] = 0;
+	_calculateChecksum();
+}
+
 byte dmx2serial::_hammingWeight(byte v) {
 	byte b0, b1, c;
 	b0 = (v >> 0) & 0b01010101;
