@@ -169,12 +169,11 @@ void dmx2serial::_calculateParity() {
 }
 
 bool dmx2serial::_checkChecksum() {
-	/* TODO */
-	return false;
+	return (_inputBuffer[6] == _crc8(_inputBuffer, 2, 5));
 }
 
 void dmx2serial::_calculateChecksum() {
-	/* TODO */
+	_outputBuffer[6] = _crc8(_outputBuffer, 2, 5);
 }
 
 void dmx2serial::_createHsTell() {
@@ -215,6 +214,35 @@ void dmx2serial::_createCfgSet() {
 	_outputBuffer[4] = _inputChannels >> 8; // higher byte
 	_outputBuffer[5] = 0;
 	_calculateChecksum();
+}
+
+byte dmx2serial::_crc8(byte[] buffer, byte start, byte end) {
+	byte result;
+	for(byte i=start; i <= end; ++i) {
+		_crc8byte(&result, buffer[i]);
+	}
+	_crc8byte(&result, 0);
+	return result;
+}
+
+void dmx2serial::_crc8byte(byte &crc, byte val) {
+	byte flag;
+	for(byte i=0; i < 8; ++i) {
+		if (*crc & 0x80) {
+			flag = 1;
+		} else {
+			flag = 0;
+		};
+		*crc <<= 1;
+		if (val & 0x80) {
+			reg |= 1;
+		};
+		*crc <<= 1;
+		if (flag) {
+			*crc ^= 0xd5;
+		};
+	}
+	return reg;
 }
 
 byte dmx2serial::_hammingWeight(byte v) {

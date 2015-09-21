@@ -33,6 +33,8 @@ class dmx2serial {
 		void _createChAnswer(bool success, bool resend);
 		void _createChSet(byte universe, word channel, byte value);
 		void _createCfgSet();
+		byte _crc8(byte[] buffer, byte start, byte end);
+		void _crc8byte(byte &crc, byte val);
 		byte _hammingWeight(byte val);
 		/*
 		 * Configuration:
