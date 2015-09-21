@@ -23,10 +23,11 @@ bool dmx2serial::isConnected() {
 
 bool dmx2serial::poll() {
 	if (_configurated) {
+		int incoming;
 		if (_inputPointer < 2) {
 			/* Reading header. */
 			do {
-				int incoming = _serial.read();
+				incoming = _serial->read();
 				_storeIncoming(incoming);
 			} while (incoming != -1 && _inputPointer <= 2);
 		};
@@ -42,7 +43,7 @@ bool dmx2serial::poll() {
 		if (_inputPointer >= 2) {
 			/* Reading payload. */
 			do {
-				int incoming = _serial.read();
+				incoming = _serial->read();
 				_storeIncoming(incoming);
 			} while (incoming != -1 && _inputPointer <= 6);
 		};
@@ -56,7 +57,7 @@ bool dmx2serial::poll() {
 	return false;
 }
 
-void dmx2serial::reconfigurate() {
+void dmx2serial::reconfigurate(byte universes, word inputChannels) {
 	/* TODO */
 }
 
@@ -69,13 +70,14 @@ void dmx2serial::_storeIncoming(int incoming) {
 
 void dmx2serial::_sendPacket() {
 	/* TODO: Check if successful. */
+	byte len;
 	if ((_outputBuffer[1] & DMX2SFLAG_PAYLOAD) == 0) {
-		byte len = 2;
+		len = 2;
 	} else {
-		byte len = 7;
+		len = 7;
 	};
 	for (byte i=0; i < len; ++i) {
-		_serial.write(_outputBuffer[i]);
+		_serial->write(_outputBuffer[i]);
 	}
 }
 
@@ -114,9 +116,9 @@ bool dmx2serial::_processPacket() {
 				DMX2S_DEBUGLN("No HsTell() sent, ignoring.")
 				return false;
 			};
-			if ((__inputBuffer[1] & DMX2SFLAG_SUCCESS) == 0) {
+			if ((_inputBuffer[1] & DMX2SFLAG_SUCCESS) == 0) {
 				DMX2S_DEBUGLN("HsAnswer() wasn't successfull.")
-				if ((__inputBuffer[1] & DMX2SFLAG_RESEND) == 0) {
+				if ((_inputBuffer[1] & DMX2SFLAG_RESEND) == 0) {
 					DMX2S_DEBUGLN("No resend wanted.")
 					_hstold = false;
 					return false;
@@ -161,7 +163,7 @@ bool dmx2serial::_checkParity() {
 }
 
 void dmx2serial::_calculateParity() {
-	_outputBuffer[1] &= ~DMX2SFLAG_PARITY
+	_outputBuffer[1] &= ~DMX2SFLAG_PARITY;
 	byte odd = (_hammingWeight(_outputBuffer[0]) + _hammingWeight(_outputBuffer[1])) % 2;
 	if (odd == 1) {
 		_outputBuffer[1] |= DMX2SFLAG_PARITY;
@@ -216,7 +218,7 @@ void dmx2serial::_createCfgSet() {
 	_calculateChecksum();
 }
 
-byte dmx2serial::_crc8(byte[] buffer, byte start, byte end) {
+byte dmx2serial::_crc8(byte buffer[], byte start, byte end) {
 	byte result;
 	for(byte i=start; i <= end; ++i) {
 		_crc8byte(&result, buffer[i]);
@@ -225,7 +227,7 @@ byte dmx2serial::_crc8(byte[] buffer, byte start, byte end) {
 	return result;
 }
 
-void dmx2serial::_crc8byte(byte &crc, byte val) {
+void dmx2serial::_crc8byte(byte *crc, byte val) {
 	byte flag;
 	for(byte i=0; i < 8; ++i) {
 		if (*crc & 0x80) {
@@ -235,14 +237,13 @@ void dmx2serial::_crc8byte(byte &crc, byte val) {
 		};
 		*crc <<= 1;
 		if (val & 0x80) {
-			reg |= 1;
+			*crc |= 1;
 		};
 		*crc <<= 1;
 		if (flag) {
 			*crc ^= 0xd5;
 		};
 	}
-	return reg;
 }
 
 byte dmx2serial::_hammingWeight(byte v) {

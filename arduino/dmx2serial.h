@@ -11,8 +11,8 @@
 #define DMX2SFLAG_HELLO       0b00000010
 #define DMX2SFLAG_PARITY      0b00000001
 
-#define DMX2S_DEBUG(__args__)   if (_debugStream) { _debugStream.print(__args__); };
-#define DMX2S_DEBUGLN(__args__) if (_debugStream) { _debugStream.println(__args__); };
+#define DMX2S_DEBUG(__args__)   if (_debugStream) { _debugStream->print(__args__); };
+#define DMX2S_DEBUGLN(__args__) if (_debugStream) { _debugStream->println(__args__); };
 
 class dmx2serial {
 	public:
@@ -20,7 +20,7 @@ class dmx2serial {
 		void begin(Stream &serial, Stream &debugStream, byte universes, word inputChannels);
 		bool isConnected();
 		bool poll();
-		bool reconfigurate(byte universes, word inputChannels);
+		void reconfigurate(byte universes, word inputChannels);
 	private:
 		void _storeIncoming(int incoming);
 		void _sendPacket();
@@ -33,8 +33,8 @@ class dmx2serial {
 		void _createChAnswer(bool success, bool resend);
 		void _createChSet(byte universe, word channel, byte value);
 		void _createCfgSet();
-		byte _crc8(byte[] buffer, byte start, byte end);
-		void _crc8byte(byte &crc, byte val);
+		byte _crc8(byte buffer[], byte start, byte end);
+		void _crc8byte(byte *crc, byte val);
 		byte _hammingWeight(byte val);
 		/*
 		 * Configuration:
@@ -55,6 +55,6 @@ class dmx2serial {
 		bool _configurated;
 		bool _hstold;
 		bool _connected;
-}
+};
 
 #endif // dmx2serial_h
