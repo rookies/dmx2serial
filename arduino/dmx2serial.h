@@ -21,6 +21,8 @@ class dmx2serial {
 	private:
 		void _storeIncoming(int incoming);
 		bool _processPacket();
+		bool _checkParity();
+		byte _hammingWeight(byte val);
 		/*
 		 * Configuration:
 		*/

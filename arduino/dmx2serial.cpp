@@ -70,29 +70,58 @@ void dmx2serial::_storeIncoming(int incoming) {
 }
 
 bool dmx2serial::_processPacket() {
-	/* TODO: Parity check. */
+	DMX2S_DEBUGLN("dmx2serial::_processPacket() started.")
+	if (!_checkParity()) {
+		DMX2S_DEBUGLN("Parity check failed.")
+		return false;
+	};
 	if ((_inputBuffer[1] & DMX2SFLAG_HELLO) != 0) {
 		/* Handshake packet. */
+		DMX2S_DEBUGLN("Got handshake packet.")
 		if (_connected) {
 			/* Handshake already done. */
+			DMX2S_DEBUGLN("Handshake already done.")
 			return false;
 		};
 		/* TODO */
 	} else if ((_inputBuffer[1] & DMX2SFLAG_CONFIGURATE) != 0) {
 		/* Configurate packet. */
+		DMX2S_DEBUGLN("Got configurate packet.")
 		if (!_connected) {
 			/* No handshake done. */
+			DMX2S_DEBUGLN("No handshake done.")
 			return false;
 		};
 		/* TODO */
 	} else {
 		/* Standard packet. */
+		DMX2S_DEBUGLN("Got standard packet.")
 		if (!_connected) {
 			/* No handshake done. */
+			DMX2S_DEBUGLN("No handshake done.")
 			return false;
 		};
 		/* TODO */
 	};
+}
+
+bool dmx2serial::_checkParity() {
+	byte odd = (_hammingWeight(_inputBuffer[0]) + _hammingWeight(_inputBuffer[1])) % 2;
+	return (odd == 0);
+}
+
+byte dmx2serial::_hammingWeight(byte v) {
+	byte b0, b1, c;
+	b0 = (v >> 0) & 0b01010101;
+	b1 = (v >> 1) & 0b01010101;
+	c = b0 + b1;
+	b0 = (c >> 0) & 0b00110011;
+	b1 = (c >> 2) & 0b00110011;
+	c = b0 + b1;
+	b0 = (c >> 0) & 0b00001111;
+	b1 = (c >> 4) & 0b00001111;
+	c = b0 + b1;
+	return c;
 }
 
 /*
