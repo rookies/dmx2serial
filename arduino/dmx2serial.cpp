@@ -75,6 +75,10 @@ bool dmx2serial::_processPacket() {
 		DMX2S_DEBUGLN("Parity check failed.")
 		return false;
 	};
+	if ((_inputBuffer[1] & DMX2SFLAG_PAYLOAD) != 0 && !_checkChecksum()) {
+		DMX2S_DEBUGLN("Checksum check failed.")
+		return false;
+	};
 	if ((_inputBuffer[1] & DMX2SFLAG_HELLO) != 0) {
 		/* Handshake packet. */
 		DMX2S_DEBUGLN("Got handshake packet.")
@@ -108,6 +112,23 @@ bool dmx2serial::_processPacket() {
 bool dmx2serial::_checkParity() {
 	byte odd = (_hammingWeight(_inputBuffer[0]) + _hammingWeight(_inputBuffer[1])) % 2;
 	return (odd == 0);
+}
+
+void dmx2serial::_calculateParity() {
+	_outputBuffer[1] &= ~DMX2SFLAG_PARITY
+	byte odd = (_hammingWeight(_outputBuffer[0]) + _hammingWeight(_outputBuffer[1])) % 2;
+	if (odd == 1) {
+		_outputBuffer[1] |= DMX2SFLAG_PARITY;
+	};
+}
+
+bool dmx2serial::_checkChecksum() {
+	/* TODO */
+	return false;
+}
+
+void dmx2serial::_calculateChecksum() {
+	/* TODO */
 }
 
 byte dmx2serial::_hammingWeight(byte v) {
