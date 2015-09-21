@@ -1,0 +1,4 @@
+dmx2serial		KEYWORD1
+isConnected		KEYWORD2
+poll			KEYWORD2
+reconfigurate	KEYWORD2
