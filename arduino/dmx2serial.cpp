@@ -22,7 +22,6 @@ bool dmx2serial::isConnected() {
 }
 
 bool dmx2serial::poll() {
-	bool returnCode = false;
 	if (_configurated) {
 		if (_inputPointer < 2) {
 			/* Reading header. */
@@ -35,8 +34,9 @@ bool dmx2serial::poll() {
 			/* Checking if we have payload. */
 			if ((_inputBuffer[1] & DMX2SFLAG_PAYLOAD) == 0) {
 				/* Processing packet without payload. */
-				returnCode = _processPacket();
+				bool returnCode = _processPacket();
 				_inputPointer = 0;
+				return returnCode;
 			};
 		};
 		if (_inputPointer >= 2) {
@@ -46,16 +46,14 @@ bool dmx2serial::poll() {
 				_storeIncoming(incoming);
 			} while (incoming != -1 && _inputPointer <= 6);
 		};
-		if (inputPointer == 7) {
+		if (_inputPointer == 7) {
 			/* Processing packet with payload. */
-			if (returnCode) {
-				_processPacket();
-			} else {
-				returnCode = _processPacket();
-			};
+			bool returnCode = _processPacket();
+			_inputPointer = 0;
+			return returnCode;
 		};
 	};
-	return returnCode;
+	return false;
 }
 
 void dmx2serial::reconfigurate() {
