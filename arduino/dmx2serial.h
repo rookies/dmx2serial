@@ -6,6 +6,7 @@
 
 #define DMX2SFLAG_PAYLOAD     0b10000000
 #define DMX2SFLAG_SUCCESS     0b01000000
+#define DMX2SFLAG_RESEND      0b00100000
 #define DMX2SFLAG_CONFIGURATE 0b00000100
 #define DMX2SFLAG_HELLO       0b00000010
 #define DMX2SFLAG_PARITY      0b00000001
@@ -29,7 +30,7 @@ class dmx2serial {
 		bool _checkChecksum();
 		void _calculateChecksum();
 		void _createHsTell();
-		void _createChAnswer(bool success);
+		void _createChAnswer(bool success, bool resend);
 		void _createChSet(byte universe, word channel, byte value);
 		void _createCfgSet();
 		byte _hammingWeight(byte val);

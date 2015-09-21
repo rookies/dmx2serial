@@ -5,6 +5,7 @@ import struct
 class Flag(IntEnum):
 	Payload     = 0b10000000
 	Success     = 0b01000000
+	Resend      = 0b00100000
 	Configurate = 0b00000100
 	Hello       = 0b00000010
 	Parity      = 0b00000001
@@ -136,10 +137,12 @@ class PacketFactory(object):
 		return Packet(flags=(Flag.Hello | Flag.Parity))
 		
 	@staticmethod
-	def createHsAnswer(success):
+	def createHsAnswer(success, resend):
 		p = Packet(version=1, flags=Flag.Hello)
 		if success:
 			p.flags.set(Flag.Success)
+		if resend:
+			p.flags.set(Flag.Resend)
 		p.calculateParity()
 		return p
 		
@@ -150,18 +153,22 @@ class PacketFactory(object):
 		return p
 		
 	@staticmethod
-	def createChAnswer(success):
+	def createChAnswer(success, resend):
 		p = Packet(version=1)
 		if success:
 			p.flags.set(Flag.Success)
+		if resend:
+			p.flags.set(Flag.Resend)
 		p.calculateParity()
 		return p
 		
 	@staticmethod
-	def createCfgAnswer(success):
+	def createCfgAnswer(success, resend):
 		p = Packet(version=1, flags=Flag.Configurate)
 		if success:
 			p.flags.set(Flag.Success)
+		if resend:
+			p.flags.set(Flag.Resend)
 		p.calculateParity()
 		return p
 

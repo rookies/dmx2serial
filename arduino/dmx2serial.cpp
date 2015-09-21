@@ -82,10 +82,12 @@ void dmx2serial::_sendPacket() {
 bool dmx2serial::_processPacket() {
 	DMX2S_DEBUGLN("dmx2serial::_processPacket() started.")
 	if (!_checkParity()) {
+		/* TODO: Request resending. */
 		DMX2S_DEBUGLN("Parity check failed.")
 		return false;
 	};
 	if ((_inputBuffer[1] & DMX2SFLAG_PAYLOAD) != 0 && !_checkChecksum()) {
+		/* TODO: Request resending. */
 		DMX2S_DEBUGLN("Checksum check failed.")
 		return false;
 	};
@@ -114,8 +116,17 @@ bool dmx2serial::_processPacket() {
 			};
 			if ((__inputBuffer[1] & DMX2SFLAG_SUCCESS) == 0) {
 				DMX2S_DEBUGLN("HsAnswer() wasn't successfull.")
-				_hstold = false;
-				return false;
+				if ((__inputBuffer[1] & DMX2SFLAG_RESEND) == 0) {
+					DMX2S_DEBUGLN("No resend wanted.")
+					_hstold = false;
+					return false;
+				} else {
+					DMX2S_DEBUGLN("Resend wanted, resending HsTell().")
+					_createHsTell();
+					_sendPacket();
+					DMX2S_DEBUGLN("Sent HsTell() packet.")
+					return false;
+				};
 			} else {
 				DMX2S_DEBUGLN("HsAnswer() was successfull, handshake done.")
 				_hstold = false;
@@ -177,9 +188,10 @@ void dmx2serial::_createHsTell() {
 	_calculateChecksum();
 }
 
-void dmx2serial::_createChAnswer(bool success) {
+void dmx2serial::_createChAnswer(bool success, bool resend) {
 	_outputBuffer[0] = DMX2S_VERSION;
 	_outputBuffer[1] = success?DMX2SFLAG_SUCCESS:0;
+	_outputBuffer[1] |= resend?DMX2SFLAG_RESEND:0;
 	_calculateParity();
 }
 
